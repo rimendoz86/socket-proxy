@@ -1,40 +1,28 @@
 import * as net from 'net';
-import { Message, TargetServer } from './Models';
+import {  Proxy } from './Models';
+import config from './config.json'
 
 export class SocketProxy {
-    public Message: Message | undefined;
     public SocketClient: net.Socket | undefined;
-    public SMTPTarget = new TargetServer('localhost','127.0.0.1', 25)
+    public Proxies = []; 
 
     constructor() {
-        this.Start()
+        config.proxys.forEach(proxy => {
+            let newProxy = this.Start(proxy)
+            this.Proxies.push(newProxy)
+        });
     }
 
-    public Start() {
+    public Start(proxy: Proxy) {
         const server = net.createServer((socket) => {
 
-            var client: net.Socket = this.CreateClient(this.SMTPTarget.IP, this.SMTPTarget.Port);
-
-            var checkForNewClient = (message: string) => {
-                if (message.indexOf('EHLO') < 0) return client;
-                var targetServer: string = message.split(' ')[1]
-                if(targetServer.indexOf(this.SMTPTarget.IP) >= 0) return client;
-
-                client.end();
-                let newTargetServer = new TargetServer('newServer','127.0.0.1', 1025);
-                return this.CreateClient(newTargetServer.Name,newTargetServer.Port)
-            }
-
-            let socketRespond = (message: string) => {
-                socket.write(message, err => {
-                    if (err) console.log(err);
-                })
-            }
+            var client = net.createConnection(proxy.TargetPort, proxy.TargetIP, () => {
+                // 'connect' listener
+            });
 
             socket.on('data', data => {
-                console.log(socket.localAddress);
-                //client = checkForNewClient(this.DatatoString(data))
-                client.write(data.toString());
+                config.listen && console.log(this.DatatoString(data))
+                client.write(data);
             })
 
             socket.on('end', () => {
@@ -42,26 +30,28 @@ export class SocketProxy {
             })
 
             client.on('data', (data) => {
-                socketRespond(this.DatatoString(data))
+                config.listen && console.log(this.DatatoString(data))
+                socket.write(data)
             });
 
             client.on('end', () => {
                 socket.end()
             });
+            
+            client.on('error', err => {
+                console.log(err);
+            })
 
         }).on('error', (err) => {
             // Handle errors here.
-            throw err;
+            console.log(err);
         });
 
-        server.listen(1025, "127.0.0.1", () => {
-            console.log('opened server on', server.address());
+        server.listen(proxy.SourcePort, proxy.SourceIP, () => {
+            console.log('proxy opened', proxy);
         });
-    }
-    CreateClient(iP: string, port: number): net.Socket {
-        return net.createConnection(port, iP, () => {
-            // 'connect' listener
-        });
+
+        return server;
     }
 
     DatatoString(data: ArrayBuffer | SharedArrayBuffer) {
