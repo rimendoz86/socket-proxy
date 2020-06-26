@@ -11,6 +11,4 @@ import { SocketProxy } from '../src/SocketProxy';
         console.log("ther was an err")
         console.log(err)
     })
-    newProxy.Verbose = true;
-    newProxy.Close();
 })();
