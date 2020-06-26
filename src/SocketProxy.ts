@@ -8,7 +8,6 @@ export class SocketProxy implements ProxyConfig {
     readonly SourcePort: number;
     readonly TargetIP: string;
     readonly TargetPort: number;
-    public Listen: boolean = false;
     public Verbose: boolean = false;
 
     constructor(proxyConfig: ProxyConfig) {
@@ -26,7 +25,6 @@ export class SocketProxy implements ProxyConfig {
             socket.on('data', data => {
                 this._onData && this._onData(data);
                 client.write(data);
-                this.Listen && console.log(data.toString)
 
             })
             socket.on('connect', () => {
@@ -40,7 +38,6 @@ export class SocketProxy implements ProxyConfig {
             client.on('data', (data) => {
                 this._onData && this._onData(data);
                 socket.write(data)
-                this.Listen && console.log(data.toString)
             });
 
             client.on('end', () => {
