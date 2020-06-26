@@ -1,0 +1,7 @@
+{
+    "Listen": false,
+    "SourceIP": "127.0.0.1",
+    "SourcePort": 1025,
+    "TargetIP": "127.0.0.1",
+    "TargetPort": 25
+}

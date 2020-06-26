@@ -4,8 +4,8 @@
   "description": "Interconnects an incoming socket connection to a remote socket connection.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon build/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon build/src/Index.js",
+    "test": "nodemon build/test/Test.js",
     "build": "tsc"
   },
   "author": "Ricardo Mendoza",
